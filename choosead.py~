@@ -3,49 +3,69 @@
 import os
 import re
 import random
+import csv
 
-prestr = 'pre-'
-poststr = 'post-'
-preposttypes = {'cine': 2, 'ad': 3 }
-videotypes = {'trailer': 1}
-dirtypes = {'cine': 'ads', 'ad': 'ads', 'trailer': 'ads'}
+#import video types from csv
+#types, dir, count, prefix, openclose
 
-def selectrandomfiles(searchstr,noofitems,dir):
-	"Select random number of files based on searchstr in directory dir"
-	randomfiles = [f for f in os.listdir(dir) if re.match(searchstr + '*',f)]
-	selectedrandomfiles = random.sample(randomfiles,noofitems)
+settingsfile = 'videotypes.csv'
 
-	return selectedrandomfiles
+def getcsvsettings(settingsfile):
+    print(settingsfile)
+    videotypes = []
+    with open(settingsfile) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            videotypes.append({'type': row['types'], 'dir': row['dir'], 'count': row['count'],
+                'prefix': row['prefix'], 'openclose': row['openclose']})
+    return videotypes
 
-def printvideos(videos):
-	for videotype, videolist in videos.items():
-		print("=====" + videotype + "=====")
-		print("\n".join(videolist))
-#Get Pre videos
-prevideos = {}
-for tstr, items in preposttypes.items():
-	prevideos[tstr] = selectrandomfiles(prestr + tstr,items,dirtypes[tstr])
+def selectrandomfiles(vdir,vcount,vprefix):
+    "Select random number of files based on searchstr in directory dir"
+    print(vdir + vcount + vprefix)
+    if vprefix == '':
+        randomfiles = [f for f in os.listdir(vdir) if isfile(join(vdir,f))]
+    else:
+        searchstr = vprefix + '*'
+        randomfiles = [f for f in os.listdir(vdir) if re.match(searchstr,f)]
+    selectedrandomfiles = random.sample(randomfiles,int(vcount))
+    
+    return selectedrandomfiles
 
-print("================Pre Videos================")
-printvideos(prevideos)
+def selectmatchingfiles(thisprefix,otherprefix,videolist):
+    "Select matching files for an existing video list based on the prefix"
+    print(thisprefix + otherprefix)
+    print(videolist)
+    selectedmatchingfiles = []
+    for video in videolist.items():
+        selectedmatchingfiles.append(video.replace(otherprefix,thisprefix))
 
-#get other video types
-othervideos = {}
-for tstr, items in videotypes.items():
-	othervideos[tstr] = selectrandomfiles(tstr,items,dirtypes[tstr])
+    return selectedmatchingfiles
 
-print("================Other Videos================")
-printvideos(othervideos)
+def choosevideos(videotype,selectedvideos):
+    print(videotype)
+    print(selectedvideos)
+    if videotype.get('openclose') == '':
+        videolist = selectrandomfiles(
+            videotype.get('dir'),
+            videotype.get('count'),
+            videotype.get('prefix'))
+    else:
+        othertype = videotype.get('openclose')
+        for vtype in videotypes.items():
+            if vtype.get('type' == othertype):
+                    videolist = selectmatchingfiles(
+                        videotype.get('prefix'),
+                        vtype.get('prefix'),
+                        selectedvideos[vtype.get('type')])
+    return videolist
 
-#Select post videos to match Pre
-postvideos = {}
-for tstr, vidlist in prevideos.items():
-	if type(vidlist) is list:
-		postvideos[tstr] = [v.replace(prestr,poststr) for v in vidlist]
-	else :
-		postvideos[tstr] = vidlist.replace(prestr,poststr)
+def CreatePlaylist():
+    print("Creating Playlist")
 
-print("================Post Videos================")
-printvideos(postvideos)
+vtypes = getcsvsettings(settingsfile)
+selection = {}
+for videotype in vtypes:
+    selection[videotype.get('type')]=choosevideos(videotype,selection)
 
-
+print(selection)
