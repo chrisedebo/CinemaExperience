@@ -11,40 +11,49 @@ import csv
 settingsfile = 'videotypes.csv'
 
 def getcsvsettings(settingsfile):
-    print(settingsfile)
+    #print('===========Getting Settings==============')
+    #print(settingsfile)
     videotypes = []
     with open(settingsfile) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             videotypes.append({'type': row['types'], 'dir': row['dir'], 'count': row['count'],
                 'prefix': row['prefix'], 'openclose': row['openclose']})
+    #print('===========Getting Settings==============')
     return videotypes
 
 def selectrandomfiles(vdir,vcount,vprefix):
     "Select random number of files based on searchstr in directory dir"
-    print(vdir + vcount + vprefix)
+    #print('===========Selecting Random Files==============')
+    #print(vdir + ' ' + vcount + ' ' + ' ' + vprefix)
     if vprefix == '':
-        randomfiles = [f for f in os.listdir(vdir) if isfile(join(vdir,f))]
+        randomfiles = [f for f in os.listdir(vdir) if os.path.isfile(os.path.join(vdir,f))]
     else:
         searchstr = vprefix + '*'
         randomfiles = [f for f in os.listdir(vdir) if re.match(searchstr,f)]
     selectedrandomfiles = random.sample(randomfiles,int(vcount))
     
+    #print(selectedrandomfiles)
+    #print('===========Selecting Random Files==============')
     return selectedrandomfiles
 
 def selectmatchingfiles(thisprefix,otherprefix,videolist):
     "Select matching files for an existing video list based on the prefix"
-    print(thisprefix + otherprefix)
-    print(videolist)
+    #print('============Selecting matching files==============')
+    #print(thisprefix + otherprefix)
+    #print(videolist)
     selectedmatchingfiles = []
-    for video in videolist.items():
+    for video in videolist:
         selectedmatchingfiles.append(video.replace(otherprefix,thisprefix))
 
+    #print(selectedmatchingfiles)
+    #print('============Selecting matching files==============')
     return selectedmatchingfiles
 
-def choosevideos(videotype,selectedvideos):
-    print(videotype)
-    print(selectedvideos)
+def choosevideos(videotype,selectedvideos,videotypes):
+    #print('===========Choosing Videos==============')
+    #print(videotype)
+    #print(selectedvideos)
     if videotype.get('openclose') == '':
         videolist = selectrandomfiles(
             videotype.get('dir'),
@@ -52,12 +61,16 @@ def choosevideos(videotype,selectedvideos):
             videotype.get('prefix'))
     else:
         othertype = videotype.get('openclose')
-        for vtype in videotypes.items():
-            if vtype.get('type' == othertype):
-                    videolist = selectmatchingfiles(
-                        videotype.get('prefix'),
-                        vtype.get('prefix'),
-                        selectedvideos[vtype.get('type')])
+        for vtype in videotypes:
+            if vtype.get('type') == othertype:
+    #            print(vtype)
+                videolist = selectmatchingfiles(
+                    videotype.get('prefix'),
+                    vtype.get('prefix'),
+                    selectedvideos[vtype.get('type')])
+    
+    #print (videolist)
+    #print('===========Choosing Videos==============')
     return videolist
 
 def CreatePlaylist():
@@ -66,6 +79,8 @@ def CreatePlaylist():
 vtypes = getcsvsettings(settingsfile)
 selection = {}
 for videotype in vtypes:
-    selection[videotype.get('type')]=choosevideos(videotype,selection)
+    selection[videotype.get('type')]=choosevideos(videotype,selection,vtypes)
 
-print(selection)
+for videotype in vtypes:
+    print('==========' + videotype.get('type') + '==========')
+    print(selection[videotype.get('type')])
