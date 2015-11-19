@@ -1,11 +1,11 @@
 types,dir,count,prefix,openclose
 PDOpen,PearlandDeanIdents,1,Opening_,
-Ads,Adverts,4,,
+Ads,Adverts,5,,
 PDClose,PearlandDeanIdents,1,Close_,PDOpen
 CineID,CinemaIdents,1,,
 InHouseAds,InHouseAdverts,2,,
 Prev,Previews,1,,
-Tr,Trailers,3,,
+Tr,Trailers,1,,
 CineP,CinemaPolicy,1,,
 FP,FeaturePresentation,1,,
 
