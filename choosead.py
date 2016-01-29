@@ -8,7 +8,10 @@ import csv
 #import video types from csv
 #types, dir, count, prefix, openclose
 
-settingsfile = 'videotypes.csv'
+settingsfile = 'S:\\Media Library\\Cinema Experience\\videotypes.csv'
+#exclude files
+exclusions = ['thumbs.db']
+
 
 def getcsvsettings(settingsfile):
     videotypes = []
@@ -22,7 +25,8 @@ def getcsvsettings(settingsfile):
 def selectrandomfiles(vdir,vcount,vprefix):
     "Select random number of files based on searchstr in directory dir"
     if vprefix == '':
-        randomfiles = [f for f in os.listdir(vdir) if os.path.isfile(os.path.join(vdir,f))]
+        randomfiles = [f for f in os.listdir(vdir) if os.path.isfile(os.path.join(vdir,f)) and 
+                f not in exclusions]
     else:
         searchstr = vprefix + '*'
         randomfiles = [f for f in os.listdir(vdir) if re.match(searchstr,f)]
